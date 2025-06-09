@@ -1,0 +1,128 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark cyber theme design system */
+
+@layer base {
+  :root {
+    --background: 10 10% 4%;
+    --foreground: 120 100% 85%;
+
+    --card: 10 10% 6%;
+    --card-foreground: 120 100% 85%;
+
+    --popover: 10 10% 6%;
+    --popover-foreground: 120 100% 85%;
+
+    --primary: 120 100% 50%;
+    --primary-foreground: 10 10% 4%;
+
+    --secondary: 210 40% 20%;
+    --secondary-foreground: 120 100% 85%;
+
+    --muted: 10 10% 15%;
+    --muted-foreground: 120 50% 60%;
+
+    --accent: 180 100% 50%;
+    --accent-foreground: 10 10% 4%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 120 20% 20%;
+    --input: 120 20% 15%;
+    --ring: 120 100% 50%;
+
+    --radius: 0.25rem;
+
+    --sidebar-background: 10 10% 4%;
+    --sidebar-foreground: 120 100% 85%;
+    --sidebar-primary: 120 100% 50%;
+    --sidebar-primary-foreground: 10 10% 4%;
+    --sidebar-accent: 210 40% 20%;
+    --sidebar-accent-foreground: 120 100% 85%;
+    --sidebar-border: 120 20% 20%;
+    --sidebar-ring: 120 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-pixel;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(0, 255, 65, 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cyber-dark;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cyber-green rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-cyber-green-bright;
+  }
+}
+
+@layer components {
+  .cyber-border {
+    position: relative;
+    border: 1px solid theme('colors.cyber.green');
+    box-shadow: 
+      0 0 10px theme('colors.cyber.green'),
+      inset 0 0 10px rgba(0, 255, 65, 0.1);
+  }
+
+  .cyber-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, transparent, theme('colors.cyber.green'), transparent);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.3;
+  }
+
+  .message-card {
+    @apply cyber-border bg-cyber-dark-alt/50 backdrop-blur-sm;
+    transition: all 0.3s ease;
+  }
+
+  .message-card:hover {
+    @apply shadow-lg;
+    box-shadow: 
+      0 0 20px theme('colors.cyber.green'),
+      inset 0 0 20px rgba(0, 255, 65, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .glow-text {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor;
+  }
+
+  .terminal-cursor::after {
+    content: '█';
+    animation: flicker 1s infinite;
+    color: theme('colors.cyber.green');
+  }
+}
