@@ -5,20 +5,28 @@ import { downloadData } from '@aws-amplify/storage';
 
 export const fetchCommentsFromS3 = async () => {
   try {
-    // Call the new downloadData function
+    console.log('Attempting to fetch comments from S3...');
     const downloadResult = await downloadData({
       key: 'comment_db.json',
     }).result;
     
-    // The result's body is a Blob, so we need to read it as text
+    console.log('Successfully downloaded data from S3');
     const textData = await downloadResult.body.text();
     
-    // Parse the text data into JSON
-    return JSON.parse(textData);
+    try {
+      const parsedData = JSON.parse(textData);
+      console.log('Successfully parsed JSON data:', parsedData);
+      return parsedData;
+    } catch (parseError) {
+      console.error('Failed to parse JSON data:', parseError);
+      throw new Error('Invalid JSON format in S3 file');
+    }
     
   } catch (error) {
-    console.warn('Could not fetch comments from S3:', error);
-    // Return empty array instead of throwing error
-    return [];
+    console.error('Error fetching comments from S3:', error);
+    if (error instanceof Error) {
+      throw new Error(`S3 fetch failed: ${error.message}`);
+    }
+    throw new Error('Unknown error occurred while fetching from S3');
   }
 };
