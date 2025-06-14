@@ -1,29 +1,27 @@
+// src/services/s3Service.ts
 
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-
-const s3Client = new S3Client({
-  region: 'us-east-1', // Default region since process.env is not available in browser
-  // AWS credentials will be handled by AWS Amplify's IAM role
-  // when deployed, so we don't need to specify them here
-});
+import { get } from '@aws-amplify/storage';
 
 export const fetchCommentsFromS3 = async () => {
   try {
-    const command = new GetObjectCommand({
-      Bucket: 'pcg-comment-storage',
-      Key: 'comment_db.json',
+    // Use the 'get' function from Amplify Storage with the 'download' option
+    const downloadResult = await get({
+      key: 'comment_db.json',
+      options: {
+        // This ensures the file content is downloaded directly
+        download: true,
+      },
     });
 
-    const response = await s3Client.send(command);
+    // The body is a Blob, so we need to read it as text
+    const blob = await downloadResult.body.blob();
+    const textData = await blob.text();
     
-    if (!response.Body) {
-      throw new Error('No data received from S3');
-    }
-
-    const jsonData = await response.Body.transformToString();
-    return JSON.parse(jsonData);
+    // Parse the text data into JSON
+    return JSON.parse(textData);
+    
   } catch (error) {
-    console.error('Error fetching comments from S3:', error);
+    console.error('Error fetching and parsing comments from S3:', error);
     throw error;
   }
 };
