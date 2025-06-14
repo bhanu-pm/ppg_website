@@ -17,7 +17,8 @@ export const fetchCommentsFromS3 = async () => {
     return JSON.parse(textData);
     
   } catch (error) {
-    console.error('Error fetching and parsing comments from S3:', error);
-    throw error;
+    console.warn('Could not fetch comments from S3:', error);
+    // Return empty array instead of throwing error
+    return [];
   }
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { JsonMessage } from '@/types/message';
 import { fetchCommentsFromS3 } from '@/services/s3Service';
@@ -31,18 +30,22 @@ export const useS3Comments = () => {
 
       setMessages(parsedMessages);
       
-      toast({
-        title: "Data Loaded",
-        description: `Successfully loaded ${parsedMessages.length} messages from S3`,
-      });
+      if (parsedMessages.length > 0) {
+        toast({
+          title: "Data Loaded",
+          description: `Successfully loaded ${parsedMessages.length} messages from S3`,
+        });
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data from S3';
       setError(errorMessage);
+      setMessages([]); // Set empty messages on error
       
+      // Show error toast but don't block the UI
       toast({
-        title: "Load Error",
-        description: errorMessage,
-        variant: "destructive"
+        title: "S3 Load Warning",
+        description: "Could not load messages from S3. The rest of the application will continue to work.",
+        variant: "warning"
       });
     } finally {
       setIsLoading(false);
