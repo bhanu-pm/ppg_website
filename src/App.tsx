@@ -1,9 +1,6 @@
 // src/App.tsx
 
 import { Amplify } from 'aws-amplify';
-// Import your new manual configuration file
-import amplifyConfig from './amplify-config'; 
-
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,8 +8,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-// Configure Amplify with your manual settings
-Amplify.configure(amplifyConfig);
+Amplify.configure({
+  Storage: {
+    S3: {
+      // This should be your S3 bucket's region (e.g., 'us-east-1')
+      region: 'us-east-1', 
+      // This is your S3 bucket name
+      bucket: 'pcg-comment-storage',
+    }
+  },
+  Auth: {}
+});
 
 const queryClient = new QueryClient();
 
