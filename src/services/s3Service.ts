@@ -1,21 +1,17 @@
 // src/services/s3Service.ts
 
-import { get } from '@aws-amplify/storage';
+// This is the new, correct import for downloading data in Amplify v6
+import { downloadData } from '@aws-amplify/storage';
 
 export const fetchCommentsFromS3 = async () => {
   try {
-    // Use the 'get' function from Amplify Storage with the 'download' option
-    const downloadResult = await get({
+    // Call the new downloadData function
+    const downloadResult = await downloadData({
       key: 'comment_db.json',
-      options: {
-        // This ensures the file content is downloaded directly
-        download: true,
-      },
-    });
-
-    // The body is a Blob, so we need to read it as text
-    const blob = await downloadResult.body.blob();
-    const textData = await blob.text();
+    }).result;
+    
+    // The result's body is a Blob, so we need to read it as text
+    const textData = await downloadResult.body.text();
     
     // Parse the text data into JSON
     return JSON.parse(textData);
