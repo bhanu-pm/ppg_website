@@ -1,16 +1,37 @@
-
 import React from 'react';
 import { JsonMessage } from '@/types/message';
 import MessageCard from './MessageCard';
-import { Database, Filter } from 'lucide-react';
+import MessageCardSkeleton from './MessageCardSkeleton'; // Import the new skeleton
+import { Database, Filter, Loader } from 'lucide-react';
 
 interface MessageListProps {
   messages: JsonMessage[];
   timeFrame: string;
+  isLoading: boolean; // Add isLoading prop
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame }) => {
-  if (messages.length === 0) {
+const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame, isLoading }) => {
+  // Show skeleton loaders while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Loader className="w-5 h-5 text-cyber-green animate-spin" />
+          <h2 className="text-lg font-pixel text-cyber-green glow-text">
+            LOADING MESSAGES...
+          </h2>
+        </div>
+        <div className="space-y-0">
+          {[...Array(3)].map((_, index) => (
+            <MessageCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show this message only after loading is complete and there are no messages
+  if (!isLoading && messages.length === 0) {
     return (
       <div className="cyber-border p-8 rounded-sm bg-cyber-dark-alt/30 text-center">
         <Database className="w-12 h-12 text-cyber-green/50 mx-auto mb-4" />
@@ -18,12 +39,13 @@ const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame }) => {
           NO MESSAGES FOUND
         </h3>
         <p className="text-sm text-cyber-green/50 font-mono">
-          Parse some JSON messages to see them here
+          The S3 file might be empty. You can add messages using the parser.
         </p>
       </div>
     );
   }
 
+  // Render the list of messages once loaded
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">

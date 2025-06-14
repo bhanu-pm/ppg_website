@@ -1,4 +1,4 @@
-
+// src/pages/Index.tsx
 import React, { useState, useMemo } from 'react';
 import { JsonMessage } from '@/types/message';
 import JsonParser from '@/components/JsonParser';
@@ -110,6 +110,7 @@ const Index = () => {
             <MessageList 
               messages={filteredMessages} 
               timeFrame={selectedTimeFrame}
+              isLoading={isLoading}
             />
           </div>
         </div>
