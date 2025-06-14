@@ -1,8 +1,8 @@
 // src/App.tsx
 
 import { Amplify } from 'aws-amplify';
-// Make sure the path to your aws-exports file is correct
-import awsExports from './aws-exports'; 
+// Import your new manual configuration file
+import amplifyConfig from './amplify-config'; 
 
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,8 +11,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-// Configure Amplify
-Amplify.configure(awsExports);
+// Configure Amplify with your manual settings
+Amplify.configure(amplifyConfig);
 
 const queryClient = new QueryClient();
 
