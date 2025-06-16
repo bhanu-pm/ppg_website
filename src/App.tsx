@@ -11,13 +11,10 @@ import NotFound from "./pages/NotFound";
 Amplify.configure({
   Storage: {
     S3: {
-      // This should be your S3 bucket's region (e.g., 'us-east-1')
-      region: 'us-east-1', 
-      // This is your S3 bucket name
       bucket: 'pcg-comment-storage',
+      region: 'us-east-1',
     }
-  },
-  Auth: {}
+  }
 });
 
 const queryClient = new QueryClient();

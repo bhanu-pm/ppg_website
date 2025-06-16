@@ -36,10 +36,10 @@ const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame, isLoadin
       <div className="cyber-border p-8 rounded-sm bg-cyber-dark-alt/30 text-center">
         <Database className="w-12 h-12 text-cyber-green/50 mx-auto mb-4" />
         <h3 className="text-lg font-pixel text-cyber-green/70 mb-2">
-          NO MESSAGES FOUND
+          NO MESSAGES AVAILABLE
         </h3>
         <p className="text-sm text-cyber-green/50 font-mono">
-          The S3 file might be empty. You can add messages using the parser.
+          The message database is empty or not yet initialized.
         </p>
       </div>
     );
