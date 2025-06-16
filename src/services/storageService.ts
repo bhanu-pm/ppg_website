@@ -1,9 +1,9 @@
-import { get } from '@aws-amplify/storage';
+import { Storage } from '@aws-amplify/storage';
 
 export const fetchCommentsFromStorage = async () => {
   try {
     console.log('Attempting to fetch comments from storage...');
-    const result = await get('comment_db.json', {
+    const result = await Storage.get('comment_db.json', {
       download: true
     });
 

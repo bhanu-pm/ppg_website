@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { get } from '@aws-amplify/storage';
+import { Storage } from '@aws-amplify/storage';
 
 interface Message {
   id: string;
@@ -15,7 +15,7 @@ export const Messages = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const result = await get('comment_db.json', {
+        const result = await Storage.get('comment_db.json', {
           download: true
         });
 
