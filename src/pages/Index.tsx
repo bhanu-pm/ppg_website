@@ -4,23 +4,23 @@ import { JsonMessage } from '@/types/message';
 import JsonParser from '@/components/JsonParser';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
-import { useS3Comments } from '@/hooks/useS3Comments';
+import { useStorageComments } from '@/hooks/useStorageComments';
 import { isAfter, subHours } from 'date-fns';
 import { Terminal, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { messages: s3Messages, isLoading, refetch } = useS3Comments();
+  const { messages: storageMessages, isLoading, refetch } = useStorageComments();
   const [manualMessages, setManualMessages] = useState<JsonMessage[]>([]);
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('all');
   const [showParser, setShowParser] = useState(false);
 
-  // Combine S3 messages with manually added messages
+  // Combine storage messages with manually added messages
   const allMessages = useMemo(() => {
-    return [...manualMessages, ...s3Messages].sort((a, b) => 
+    return [...manualMessages, ...storageMessages].sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-  }, [s3Messages, manualMessages]);
+  }, [storageMessages, manualMessages]);
 
   const handleMessageParsed = (newMessages: JsonMessage[]) => {
     setManualMessages(prev => [...newMessages, ...prev]);

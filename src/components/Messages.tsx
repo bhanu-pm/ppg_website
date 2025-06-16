@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Message, fetchMessagesFromS3 } from '../lib/s3Service';
+import { get } from '@aws-amplify/storage';
+
+interface Message {
+  id: string;
+  content: string;
+  timestamp: string;
+}
 
 export const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -9,14 +15,17 @@ export const Messages = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
-        const key = import.meta.env.VITE_S3_MESSAGES_KEY;
-        
-        if (!bucketName || !key) {
-          throw new Error('S3 configuration missing');
+        const result = await get('comment_db.json', {
+          download: true
+        });
+
+        if (!result.Body) {
+          setMessages([]);
+          return;
         }
 
-        const data = await fetchMessagesFromS3(bucketName, key);
+        const textData = await result.Body.text();
+        const data = JSON.parse(textData);
         setMessages(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load messages');
