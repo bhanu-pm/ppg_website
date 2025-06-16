@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Storage } from '@aws-amplify/storage';
+import { downloadData } from '@aws-amplify/storage';
 
 interface Message {
   id: string;
@@ -15,16 +15,14 @@ export const Messages = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const result = await Storage.get('comment_db.json', {
-          download: true
-        });
+        const result = await downloadData('comment_db.json');
 
-        if (!result.Body) {
+        if (!result) {
           setMessages([]);
           return;
         }
 
-        const textData = await result.Body.text();
+        const textData = await result.text();
         const data = JSON.parse(textData);
         setMessages(data);
       } catch (err) {

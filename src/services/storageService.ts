@@ -1,18 +1,16 @@
-import { Storage } from '@aws-amplify/storage';
+import { getUrl, downloadData } from '@aws-amplify/storage';
 
 export const fetchCommentsFromStorage = async () => {
   try {
     console.log('Attempting to fetch comments from storage...');
-    const result = await Storage.get('comment_db.json', {
-      download: true
-    });
+    const result = await downloadData('comment_db.json');
 
-    if (!result.Body) {
+    if (!result) {
       console.log('No data received from storage, returning empty array');
       return [];
     }
 
-    const textData = await result.Body.text();
+    const textData = await result.text();
     console.log('Successfully downloaded data from storage');
     
     try {
