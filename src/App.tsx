@@ -1,21 +1,11 @@
 // src/App.tsx
 
-import { Amplify } from 'aws-amplify';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
-Amplify.configure({
-  Storage: {
-    S3: {
-      bucket: 'pcg-comment-storage',
-      region: 'us-east-1',
-    }
-  }
-});
 
 const queryClient = new QueryClient();
 

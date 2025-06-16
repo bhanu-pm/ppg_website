@@ -11,7 +11,7 @@ export const fetchCommentsFromS3 = async () => {
   try {
     console.log('Attempting to fetch comments from S3...');
     const command = new GetObjectCommand({
-      Bucket: 'pcg-comment-storage',
+      Bucket: 'ppg-comment-amplify-bucket',
       Key: 'comment_db.json',
     });
 

@@ -1,10 +1,10 @@
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const s3Client = new S3Client({
-  region: process.env.VITE_AWS_REGION,
+  region: 'us-east-1',
   credentials: {
-    accessKeyId: process.env.VITE_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.VITE_AWS_SECRET_ACCESS_KEY || '',
+    accessKeyId: 'YOUR_ACCESS_KEY_ID', // Replace with your actual access key
+    secretAccessKey: 'YOUR_SECRET_ACCESS_KEY', // Replace with your actual secret key
   },
 });
 
@@ -12,7 +12,6 @@ export interface Message {
   id: string;
   content: string;
   timestamp: string;
-  // Add other message properties as needed
 }
 
 export const fetchMessagesFromS3 = async (bucketName: string, key: string): Promise<Message[]> => {

@@ -3,7 +3,7 @@ import { Amplify } from 'aws-amplify';
 Amplify.configure({
   Storage: {
     AWSS3: {
-      bucket: 'pcg-comment-storage',
+      bucket: 'ppg-comment-amplify-bucket',
       region: 'us-east-1',
     }
   }
