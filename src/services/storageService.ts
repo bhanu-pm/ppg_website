@@ -1,16 +1,27 @@
-import { getUrl, downloadData } from '@aws-amplify/storage';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3_CONFIG } from '@/config/s3';
+
+const s3Client = new S3Client({
+  region: S3_CONFIG.region,
+});
 
 export const fetchCommentsFromStorage = async () => {
   try {
     console.log('Attempting to fetch comments from storage...');
-    const result = await downloadData('comment_db.json');
+    
+    const command = new GetObjectCommand({
+      Bucket: S3_CONFIG.bucket,
+      Key: 'comment_db.json',
+    });
 
-    if (!result) {
+    const response = await s3Client.send(command);
+    
+    if (!response.Body) {
       console.log('No data received from storage, returning empty array');
       return [];
     }
 
-    const textData = await result.text();
+    const textData = await response.Body.transformToString();
     console.log('Successfully downloaded data from storage');
     
     try {

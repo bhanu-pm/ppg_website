@@ -1,10 +1,5 @@
 import { Amplify } from 'aws-amplify';
 
 Amplify.configure({
-  Storage: {
-    AWSS3: {
-      bucket: 'ppg-comment-amplify-bucket',
-      region: 'us-east-1',
-    }
-  }
+  // Storage configuration removed as we're using S3 directly
 }); 

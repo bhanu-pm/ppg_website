@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { downloadData } from '@aws-amplify/storage';
+import { fetchCommentsFromStorage } from '@/services/storageService';
 
 interface Message {
   id: string;
@@ -15,15 +15,7 @@ export const Messages = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const result = await downloadData('comment_db.json');
-
-        if (!result) {
-          setMessages([]);
-          return;
-        }
-
-        const textData = await result.text();
-        const data = JSON.parse(textData);
+        const data = await fetchCommentsFromStorage();
         setMessages(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load messages');
