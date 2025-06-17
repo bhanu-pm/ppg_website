@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchCommentsFromStorage } from '@/services/storageService';
+import { fetchMessages } from '@/services/messageService';
 
 interface Message {
   id: string;
@@ -15,7 +15,7 @@ export const Messages = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const data = await fetchCommentsFromStorage();
+        const data = await fetchMessages();
         setMessages(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load messages');
