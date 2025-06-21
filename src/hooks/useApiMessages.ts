@@ -29,15 +29,39 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
       // Use the new API endpoint that returns your format
       const response: YourApiResponse = await apiService.getLatestMessages();
       
+      // Debug logging
+      console.log('API Response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', Object.keys(response));
+      
       // Track the status code
       setStatusCode(response.statusCode);
+      console.log('Status code set to:', response.statusCode);
       
       // Parse the response using our parser
       const parsed = parseApiResponse(response);
+      console.log('Parsed response:', parsed);
       
       // Check if the response contains "No new comments!" message
-      if (typeof response.body === 'string' && response.body.includes('No new comments')) {
-        setNoNewCommentsMessage(response.body);
+      // Handle both plain string and JSON-encoded string cases
+      if (typeof response.body === 'string') {
+        console.log('Body is string:', response.body);
+        // Try to parse as JSON first (in case it's json.dumps output)
+        try {
+          const parsedBody = JSON.parse(response.body);
+          console.log('Parsed body as JSON:', parsedBody);
+          if (typeof parsedBody === 'string' && parsedBody.includes('No new comments')) {
+            console.log('Found "No new comments" in parsed JSON body');
+            setNoNewCommentsMessage(parsedBody);
+          }
+        } catch {
+          console.log('Body is not valid JSON, checking for plain string');
+          // If not JSON, check if it's a plain string
+          if (response.body.includes('No new comments')) {
+            console.log('Found "No new comments" in plain string body');
+            setNoNewCommentsMessage(response.body);
+          }
+        }
       }
       
       if (parsed.hasNewMessages) {
@@ -59,6 +83,7 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
       setLastResponse(parsed.message);
       
     } catch (err) {
+      console.error('API Error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data from API';
       setError(errorMessage);
       setStatusCode(null);

@@ -99,7 +99,10 @@ class ApiService {
 
   // Get latest messages in your API format
   async getLatestMessages(): Promise<YourApiResponse> {
-    return this.request<YourApiResponse>('/messages/latest');
+    console.log('Making request to /messages/latest');
+    const response = await this.request<YourApiResponse>('/messages/latest');
+    console.log('Raw API response:', response);
+    return response;
   }
 
   // Get all messages (for compatibility)

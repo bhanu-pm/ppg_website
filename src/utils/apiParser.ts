@@ -92,26 +92,43 @@ export const parseApiResponse = (response: YourApiResponse): ParsedApiResponse =
     };
   }
 
-  // Handle string body (like "No new comments!")
+  // Handle string body (like "No new comments!" or json.dumps output)
   if (typeof body === 'string') {
-    if (body.includes('No new comments') || body.includes('No new messages')) {
-      return {
-        messages: [],
-        hasNewMessages: false,
-        message: body
-      };
-    }
-    
-    // Try to parse as JSON string with mixed quotes
+    // First, try to parse as JSON (in case it's json.dumps output)
     try {
-      const parsedBody = safeJsonParse(body);
+      const parsedBody = JSON.parse(body);
+      // If it's a JSON string that contains "No new comments", handle it
+      if (typeof parsedBody === 'string' && parsedBody.includes('No new comments')) {
+        return {
+          messages: [],
+          hasNewMessages: false,
+          message: parsedBody
+        };
+      }
+      // If it parsed successfully but doesn't contain "No new comments", 
+      // recursively parse the parsed body
       return parseApiResponse({ statusCode, body: parsedBody });
     } catch {
-      return {
-        messages: [],
-        hasNewMessages: false,
-        message: body
-      };
+      // If JSON parsing fails, check if it's a plain string with "No new comments"
+      if (body.includes('No new comments') || body.includes('No new messages')) {
+        return {
+          messages: [],
+          hasNewMessages: false,
+          message: body
+        };
+      }
+      
+      // Try to parse as JSON string with mixed quotes
+      try {
+        const parsedBody = safeJsonParse(body);
+        return parseApiResponse({ statusCode, body: parsedBody });
+      } catch {
+        return {
+          messages: [],
+          hasNewMessages: false,
+          message: body
+        };
+      }
     }
   }
 

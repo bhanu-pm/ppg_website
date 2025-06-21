@@ -4,6 +4,7 @@ import { JsonMessage } from '@/types/message';
 import JsonParser from '@/components/JsonParser';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
+import ApiTester from '@/components/ApiTester';
 import { useApiMessages } from '@/hooks/useApiMessages';
 import { isAfter, subHours } from 'date-fns';
 import { Terminal, Plus, RefreshCw } from 'lucide-react';
@@ -122,6 +123,9 @@ const Index = () => {
                 </div>
               )}
             </div>
+
+            {/* API Tester (temporary for debugging) */}
+            <ApiTester />
           </div>
 
           {/* Messages Panel */}
