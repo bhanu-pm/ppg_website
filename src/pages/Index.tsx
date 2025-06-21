@@ -10,7 +10,7 @@ import { Terminal, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { messages, isLoading, refetch, addMessages, lastResponse } = useApiMessages({
+  const { messages, isLoading, refetch, addMessages, lastResponse, statusCode, noNewCommentsMessage } = useApiMessages({
     autoRefresh: true,
     refreshInterval: 30000 // Refresh every 30 seconds
   });
@@ -114,7 +114,7 @@ const Index = () => {
             <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
               <div className="text-sm font-pixel text-cyber-green mb-2">API STATUS:</div>
               <div className="text-xs font-mono text-cyber-green/70">
-                {isLoading ? 'FETCHING...' : 'CONNECTED'}
+                {isLoading ? 'FETCHING...' : statusCode ? `CONNECTED (${statusCode})` : 'CONNECTED'}
               </div>
               {lastResponse && (
                 <div className="text-xs font-mono text-cyber-green/60 mt-1">
@@ -130,6 +130,7 @@ const Index = () => {
               messages={filteredMessages} 
               timeFrame={selectedTimeFrame}
               isLoading={isLoading}
+              noNewCommentsMessage={noNewCommentsMessage}
             />
           </div>
         </div>

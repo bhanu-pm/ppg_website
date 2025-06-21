@@ -17,17 +17,28 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastResponse, setLastResponse] = useState<string>('');
+  const [statusCode, setStatusCode] = useState<number | null>(null);
+  const [noNewCommentsMessage, setNoNewCommentsMessage] = useState<string | null>(null);
 
   const loadMessages = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setNoNewCommentsMessage(null);
     
     try {
       // Use the new API endpoint that returns your format
       const response: YourApiResponse = await apiService.getLatestMessages();
       
+      // Track the status code
+      setStatusCode(response.statusCode);
+      
       // Parse the response using our parser
       const parsed = parseApiResponse(response);
+      
+      // Check if the response contains "No new comments!" message
+      if (typeof response.body === 'string' && response.body.includes('No new comments')) {
+        setNoNewCommentsMessage(response.body);
+      }
       
       if (parsed.hasNewMessages) {
         // Add new messages to existing ones
@@ -50,12 +61,16 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data from API';
       setError(errorMessage);
+      setStatusCode(null);
       
-      toast({
-        title: "API Load Warning",
-        description: "Could not load messages from API. The rest of the application will continue to work.",
-        variant: "warning"
-      });
+      // Don't show the warning toast for expected "No new comments!" responses
+      if (!errorMessage.includes('No new comments')) {
+        toast({
+          title: "API Load Warning",
+          description: "Could not load messages from API. The rest of the application will continue to work.",
+          variant: "warning"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,6 +157,8 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     isLoading,
     error,
     lastResponse,
+    statusCode,
+    noNewCommentsMessage,
     refetch: loadMessages,
     addMessage,
     addMessages,
