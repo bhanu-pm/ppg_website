@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,9 +13,77 @@ const JsonParser: React.FC<JsonParserProps> = ({ onMessageParsed }) => {
   const [jsonInput, setJsonInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const normalizeJson = (input: string): string => {
+  // Helper function to normalize JSON string by handling mixed quotes
+  const normalizeJsonString = (input: string): string => {
+    let normalized = input;
+    
+    // First, try to handle the case where the entire string might be wrapped in single quotes
+    if (normalized.startsWith("'") && normalized.endsWith("'")) {
+      normalized = normalized.slice(1, -1);
+    }
+    
     // Replace single quotes with double quotes, but be careful with escaped quotes
-    return input.replace(/'/g, '"');
+    // We'll use a more sophisticated approach to handle mixed quotes
+    let result = '';
+    let inString = false;
+    let escapeNext = false;
+    let quoteChar = '"';
+    
+    for (let i = 0; i < normalized.length; i++) {
+      const char = normalized[i];
+      
+      if (escapeNext) {
+        result += char;
+        escapeNext = false;
+        continue;
+      }
+      
+      if (char === '\\') {
+        escapeNext = true;
+        result += char;
+        continue;
+      }
+      
+      if ((char === '"' || char === "'") && !inString) {
+        inString = true;
+        quoteChar = char;
+        result += '"'; // Always use double quotes in output
+        continue;
+      }
+      
+      if (char === quoteChar && inString) {
+        inString = false;
+        result += '"'; // Always use double quotes in output
+        continue;
+      }
+      
+      result += char;
+    }
+    
+    return result;
+  };
+
+  // Helper function to safely parse JSON with mixed quotes
+  const safeJsonParse = (input: string): any => {
+    try {
+      // First try direct parsing
+      return JSON.parse(input);
+    } catch (error) {
+      try {
+        // Try with normalized quotes
+        const normalized = normalizeJsonString(input);
+        return JSON.parse(normalized);
+      } catch (secondError) {
+        // If still fails, try a more aggressive normalization
+        try {
+          // Replace all single quotes with double quotes (simple approach)
+          const simpleNormalized = input.replace(/'/g, '"');
+          return JSON.parse(simpleNormalized);
+        } catch (thirdError) {
+          throw new Error(`Failed to parse JSON: ${input}`);
+        }
+      }
+    }
   };
 
   const parseJsonMessage = () => {
@@ -32,16 +99,16 @@ const JsonParser: React.FC<JsonParserProps> = ({ onMessageParsed }) => {
     setIsProcessing(true);
     
     try {
-      const normalizedInput = normalizeJson(jsonInput.trim());
-      const parsedData = JSON.parse(normalizedInput);
+      const parsedData = safeJsonParse(jsonInput.trim());
       
       // Check if it has the expected structure with statusCode and body
-      if (parsedData.statusCode && parsedData.body) {
+      if (parsedData.statusCode && parsedData.body !== undefined) {
         // Check if body is "No new comments!" string
-        if (typeof parsedData.body === 'string' && parsedData.body.includes('No new comments')) {
+        if (typeof parsedData.body === 'string' && 
+            (parsedData.body.includes('No new comments') || parsedData.body.includes('No new messages'))) {
           toast({
             title: "No New Messages",
-            description: "No new promo codes found",
+            description: parsedData.body,
           });
           setJsonInput('');
           setIsProcessing(false);
@@ -51,15 +118,27 @@ const JsonParser: React.FC<JsonParserProps> = ({ onMessageParsed }) => {
         // If body is an array of code objects
         if (Array.isArray(parsedData.body)) {
           const messages: JsonMessage[] = parsedData.body.map((codeObj: any, index: number) => {
+            // Handle case where codeObj might be a string that needs parsing
+            let parsedCodeObj = codeObj;
+            if (typeof codeObj === 'string') {
+              try {
+                parsedCodeObj = safeJsonParse(codeObj);
+              } catch {
+                // If parsing fails, treat as a simple string
+                parsedCodeObj = { code: codeObj, message: codeObj };
+              }
+            }
+            
             return {
               id: `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-              code: codeObj.code || 'UNKNOWN',
-              message: codeObj.code || 'No code provided',
+              code: parsedCodeObj.code || 'UNKNOWN',
+              message: parsedCodeObj.code || 'No code provided',
               timestamp: new Date(),
               severity: 'success',
               metadata: {
-                location: codeObj.location,
-                price: codeObj.price
+                location: parsedCodeObj.location,
+                price: parsedCodeObj.price,
+                ...parsedCodeObj // Include any other fields
               }
             };
           });
@@ -71,10 +150,33 @@ const JsonParser: React.FC<JsonParserProps> = ({ onMessageParsed }) => {
             title: "Messages Parsed",
             description: `Successfully parsed ${messages.length} promo code(s)`,
           });
+        } 
+        // If body is a single object
+        else if (parsedData.body && typeof parsedData.body === 'object' && parsedData.body.code) {
+          const message: JsonMessage = {
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            code: parsedData.body.code || 'UNKNOWN',
+            message: parsedData.body.code || 'No code provided',
+            timestamp: new Date(),
+            severity: 'success',
+            metadata: {
+              location: parsedData.body.location,
+              price: parsedData.body.price,
+              ...parsedData.body // Include any other fields
+            }
+          };
+
+          onMessageParsed([message]);
+          setJsonInput('');
+          
+          toast({
+            title: "Message Parsed",
+            description: "Successfully parsed 1 promo code",
+          });
         } else {
           toast({
             title: "Parse Error",
-            description: "Body does not contain an array of codes",
+            description: "Body does not contain valid message data",
             variant: "destructive"
           });
         }
@@ -135,7 +237,7 @@ const JsonParser: React.FC<JsonParserProps> = ({ onMessageParsed }) => {
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder='{"statusCode": 200, "body": [{"code": "2KK8C", "location": "MA", "price": "12"}]}'
+          placeholder='{"statusCode": 200, "body": [{"code": "BOBA25", "location": "Phoenix", "price": "15"}]}'
           className="font-mono text-sm bg-cyber-dark border-cyber-green/30 text-cyber-green resize-none"
           rows={6}
         />

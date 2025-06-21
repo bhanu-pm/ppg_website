@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TimeFrame } from '@/types/message';
@@ -10,10 +9,7 @@ interface TimeFrameSelectorProps {
 }
 
 const timeFrames: TimeFrame[] = [
-  { label: 'Last Hour', value: 'hour', hours: 1 },
-  { label: 'Last 6 Hours', value: '6hours', hours: 6 },
-  { label: 'Last 24 Hours', value: 'day', hours: 24 },
-  { label: 'Last Week', value: 'week', hours: 168 },
+  { label: 'Now', value: 'now', hours: 1/60 }, // 1 minute
   { label: 'All Messages', value: 'all', hours: Infinity },
 ];
 

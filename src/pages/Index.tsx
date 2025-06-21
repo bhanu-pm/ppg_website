@@ -4,38 +4,39 @@ import { JsonMessage } from '@/types/message';
 import JsonParser from '@/components/JsonParser';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
-import { useStorageComments } from '@/hooks/useStorageComments';
+import { useApiMessages } from '@/hooks/useApiMessages';
 import { isAfter, subHours } from 'date-fns';
 import { Terminal, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { messages: storageMessages, isLoading, refetch } = useStorageComments();
-  const [manualMessages, setManualMessages] = useState<JsonMessage[]>([]);
-  const [selectedTimeFrame, setSelectedTimeFrame] = useState('all');
+  const { messages, isLoading, refetch, addMessages, lastResponse } = useApiMessages({
+    autoRefresh: true,
+    refreshInterval: 30000 // Refresh every 30 seconds
+  });
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState('now');
   const [showParser, setShowParser] = useState(false);
 
-  // Combine storage messages with manually added messages
-  const allMessages = useMemo(() => {
-    return [...manualMessages, ...storageMessages].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-  }, [storageMessages, manualMessages]);
-
-  const handleMessageParsed = (newMessages: JsonMessage[]) => {
-    setManualMessages(prev => [...newMessages, ...prev]);
-    setShowParser(false);
+  const handleMessageParsed = async (newMessages: JsonMessage[]) => {
+    try {
+      // Convert JsonMessage to the format expected by API (without id)
+      const messagesToAdd = newMessages.map(({ id, ...message }) => message);
+      await addMessages(messagesToAdd);
+      setShowParser(false);
+    } catch (error) {
+      console.error('Failed to add messages:', error);
+    }
   };
 
   const filteredMessages = useMemo(() => {
-    if (selectedTimeFrame === 'all') return allMessages;
+    if (selectedTimeFrame === 'all') return messages;
     
     const frame = timeFrames.find(f => f.value === selectedTimeFrame);
-    if (!frame) return allMessages;
+    if (!frame) return messages;
     
     const cutoffTime = subHours(new Date(), frame.hours);
-    return allMessages.filter(message => isAfter(message.timestamp, cutoffTime));
-  }, [allMessages, selectedTimeFrame]);
+    return messages.filter(message => isAfter(message.timestamp, cutoffTime));
+  }, [messages, selectedTimeFrame]);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString();
@@ -63,6 +64,11 @@ const Index = () => {
               <div className="text-sm font-mono text-cyber-green">
                 MESSAGES: {filteredMessages.length}
               </div>
+              {lastResponse && (
+                <div className="text-xs font-mono text-cyber-green/60 mt-1">
+                  LAST UPDATE: {lastResponse}
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -102,6 +108,19 @@ const Index = () => {
                 selectedTimeFrame={selectedTimeFrame}
                 onTimeFrameChange={setSelectedTimeFrame}
               />
+            </div>
+
+            {/* API Status */}
+            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
+              <div className="text-sm font-pixel text-cyber-green mb-2">API STATUS:</div>
+              <div className="text-xs font-mono text-cyber-green/70">
+                {isLoading ? 'FETCHING...' : 'CONNECTED'}
+              </div>
+              {lastResponse && (
+                <div className="text-xs font-mono text-cyber-green/60 mt-1">
+                  {lastResponse}
+                </div>
+              )}
             </div>
           </div>
 
