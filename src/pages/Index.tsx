@@ -51,11 +51,9 @@ const Index = () => {
               <div className="text-sm font-mono text-cyber-green">
                 MESSAGES: {filteredMessages.length}
               </div>
-              {lastResponse && (
-                <div className="text-xs font-mono text-cyber-green/60 mt-1">
-                  LAST UPDATE: {lastResponse}
-                </div>
-              )}
+              <div className="text-xs font-mono text-cyber-green/60 mt-1">
+                API STATUS: {isLoading ? 'FETCHING...' : statusCode ? `${statusCode}` : 'CONNECTED'}
+              </div>
             </div>
           </div>
         </header>
@@ -64,26 +62,12 @@ const Index = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
           {/* Controls Panel */}
           <div className="xl:col-span-1 space-y-4">
-            {/* API Status */}
-            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
-              <div className="text-sm font-pixel text-cyber-green mb-2">API STATUS:</div>
-              <div className="text-xs font-mono text-cyber-green/70">
-                {isLoading ? 'FETCHING...' : statusCode ? `${statusCode}` : 'CONNECTED'}
-              </div>
-            </div>
+            {/* Empty space for future controls */}
           </div>
 
           {/* Messages Panel */}
           <div className="xl:col-span-2">
-            {/* Time Frame Selector - moved above Message Feed */}
-            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30 mb-4">
-              <TimeFrameSelector
-                selectedTimeFrame={selectedTimeFrame}
-                onTimeFrameChange={setSelectedTimeFrame}
-              />
-            </div>
-
-            {/* Message Feed with reload button */}
+            {/* Message Feed with reload button and time frame selector */}
             <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-pixel text-cyber-green glow-text">
@@ -96,6 +80,14 @@ const Index = () => {
                 >
                   <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
+              </div>
+              
+              {/* Time Frame Selector integrated into Message Feed */}
+              <div className="mb-4">
+                <TimeFrameSelector
+                  selectedTimeFrame={selectedTimeFrame}
+                  onTimeFrameChange={setSelectedTimeFrame}
+                />
               </div>
               
               <MessageList 
