@@ -1,8 +1,7 @@
 import { JsonMessage } from '@/types/message';
-import { config } from '@/config/environment';
 
 // API configuration - Hardcoded URL
-const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/dev/';
+const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/developer-stage';
 
 export interface ApiResponse<T> {
   data: T;
@@ -32,8 +31,8 @@ class ApiService {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
-    this.timeout = config.api.timeout;
-    this.retryAttempts = config.api.retryAttempts;
+    this.timeout = 10000; // Hardcoded timeout
+    this.retryAttempts = 3; // Hardcoded retry attempts
   }
 
   private async request<T>(
