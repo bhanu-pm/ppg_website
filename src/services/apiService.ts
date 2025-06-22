@@ -1,7 +1,7 @@
 import { JsonMessage } from '@/types/message';
 
 // API configuration - Hardcoded URL
-const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/developer-stage';
+const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/developer-stage/';
 
 export interface ApiResponse<T> {
   data: T;
