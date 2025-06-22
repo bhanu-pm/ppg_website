@@ -92,7 +92,7 @@ const Index = () => {
         {/* Footer */}
         <footer className="mt-6 sm:mt-8 text-center text-xs text-cyber-green/40 font-mono">
           <div className="cyber-border p-3 rounded-sm bg-cyber-dark-alt/20">
-            SYSTEM STATUS: OPERATIONAL | INVOKED AT: {getCurrentTime()}
+            SYSTEM STATUS: LIVE | INVOKED AT: {getCurrentTime()}
           </div>
         </footer>
       </div>
