@@ -58,46 +58,35 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-          {/* Controls Panel */}
-          <div className="xl:col-span-1 space-y-4">
-            {/* Empty space for future controls */}
+        {/* Message Feed Section - Full Width */}
+        <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-pixel text-cyber-green glow-text">
+              MESSAGE FEED [{filteredMessages.length}]
+            </h2>
+            <Button
+              onClick={refetch}
+              disabled={isLoading}
+              className="bg-cyber-blue hover:bg-cyber-blue-dark text-white font-pixel text-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
-
-          {/* Messages Panel */}
-          <div className="xl:col-span-2">
-            {/* Message Feed with reload button and time frame selector */}
-            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-pixel text-cyber-green glow-text">
-                  MESSAGE FEED [{filteredMessages.length}]
-                </h2>
-                <Button
-                  onClick={refetch}
-                  disabled={isLoading}
-                  className="bg-cyber-blue hover:bg-cyber-blue-dark text-white font-pixel text-sm"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
-              </div>
-              
-              {/* Time Frame Selector integrated into Message Feed */}
-              <div className="mb-4">
-                <TimeFrameSelector
-                  selectedTimeFrame={selectedTimeFrame}
-                  onTimeFrameChange={setSelectedTimeFrame}
-                />
-              </div>
-              
-              <MessageList 
-                messages={filteredMessages} 
-                timeFrame={selectedTimeFrame}
-                isLoading={isLoading}
-                noNewCommentsMessage={noNewCommentsMessage}
-              />
-            </div>
+          
+          {/* Time Frame Selector integrated into Message Feed */}
+          <div className="mb-4">
+            <TimeFrameSelector
+              selectedTimeFrame={selectedTimeFrame}
+              onTimeFrameChange={setSelectedTimeFrame}
+            />
           </div>
+          
+          <MessageList 
+            messages={filteredMessages} 
+            timeFrame={selectedTimeFrame}
+            isLoading={isLoading}
+            noNewCommentsMessage={noNewCommentsMessage}
+          />
         </div>
 
         {/* Footer */}
