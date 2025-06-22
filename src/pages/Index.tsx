@@ -1,33 +1,19 @@
 // src/pages/Index.tsx
 import React, { useState, useMemo } from 'react';
 import { JsonMessage } from '@/types/message';
-import JsonParser from '@/components/JsonParser';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
 import { useApiMessages } from '@/hooks/useApiMessages';
 import { isAfter, subHours } from 'date-fns';
-import { Terminal, Plus, RefreshCw } from 'lucide-react';
+import { Terminal, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const { messages, isLoading, refetch, lastResponse, statusCode, noNewCommentsMessage } = useApiMessages({
-    autoRefresh: true,
-    refreshInterval: 30000 // Refresh every 30 seconds
+    autoRefresh: false,
+    refreshInterval: 30000 // Not used since autoRefresh is false
   });
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('now');
-  const [showParser, setShowParser] = useState(false);
-
-  const handleMessageParsed = async (newMessages: JsonMessage[]) => {
-    try {
-      // Since we can't add messages to the API anymore, just show a success message
-      console.log('Messages parsed:', newMessages);
-      setShowParser(false);
-      // Refresh to get latest data
-      await refetch();
-    } catch (error) {
-      console.error('Failed to process messages:', error);
-    }
-  };
 
   const filteredMessages = useMemo(() => {
     if (selectedTimeFrame === 'all') return messages;
@@ -78,16 +64,31 @@ const Index = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
           {/* Controls Panel */}
           <div className="xl:col-span-1 space-y-4">
-            {/* Add Message Button */}
+            {/* API Status */}
             <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setShowParser(!showParser)}
-                  className="flex-1 bg-cyber-green hover:bg-cyber-green-dark text-cyber-dark font-pixel text-sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  ADD MESSAGE
-                </Button>
+              <div className="text-sm font-pixel text-cyber-green mb-2">API STATUS:</div>
+              <div className="text-xs font-mono text-cyber-green/70">
+                {isLoading ? 'FETCHING...' : statusCode ? `${statusCode}` : 'CONNECTED'}
+              </div>
+            </div>
+          </div>
+
+          {/* Messages Panel */}
+          <div className="xl:col-span-2">
+            {/* Time Frame Selector - moved above Message Feed */}
+            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30 mb-4">
+              <TimeFrameSelector
+                selectedTimeFrame={selectedTimeFrame}
+                onTimeFrameChange={setSelectedTimeFrame}
+              />
+            </div>
+
+            {/* Message Feed with reload button */}
+            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-pixel text-cyber-green glow-text">
+                  MESSAGE FEED [{filteredMessages.length}]
+                </h2>
                 <Button
                   onClick={refetch}
                   disabled={isLoading}
@@ -96,43 +97,14 @@ const Index = () => {
                   <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
-            </div>
-
-            {/* JSON Parser (conditionally shown) */}
-            {showParser && (
-              <JsonParser onMessageParsed={handleMessageParsed} />
-            )}
-            
-            {/* Time Frame Selector */}
-            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
-              <TimeFrameSelector
-                selectedTimeFrame={selectedTimeFrame}
-                onTimeFrameChange={setSelectedTimeFrame}
+              
+              <MessageList 
+                messages={filteredMessages} 
+                timeFrame={selectedTimeFrame}
+                isLoading={isLoading}
+                noNewCommentsMessage={noNewCommentsMessage}
               />
             </div>
-
-            {/* API Status */}
-            <div className="cyber-border p-4 rounded-sm bg-cyber-dark-alt/30">
-              <div className="text-sm font-pixel text-cyber-green mb-2">API STATUS:</div>
-              <div className="text-xs font-mono text-cyber-green/70">
-                {isLoading ? 'FETCHING...' : statusCode ? `CONNECTED (${statusCode})` : 'CONNECTED'}
-              </div>
-              {lastResponse && (
-                <div className="text-xs font-mono text-cyber-green/60 mt-1">
-                  {lastResponse}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Messages Panel */}
-          <div className="xl:col-span-2">
-            <MessageList 
-              messages={filteredMessages} 
-              timeFrame={selectedTimeFrame}
-              isLoading={isLoading}
-              noNewCommentsMessage={noNewCommentsMessage}
-            />
           </div>
         </div>
 

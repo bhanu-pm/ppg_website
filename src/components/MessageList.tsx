@@ -2,7 +2,7 @@ import React from 'react';
 import { JsonMessage } from '@/types/message';
 import MessageCard from './MessageCard';
 import MessageCardSkeleton from './MessageCardSkeleton'; // Import the new skeleton
-import { Database, Filter, Loader, MessageCircle } from 'lucide-react';
+import { Database, Loader, MessageCircle } from 'lucide-react';
 
 interface MessageListProps {
   messages: JsonMessage[];
@@ -18,9 +18,9 @@ const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame, isLoadin
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Loader className="w-5 h-5 text-cyber-green animate-spin" />
-          <h2 className="text-lg font-pixel text-cyber-green glow-text">
+          <h3 className="text-lg font-pixel text-cyber-green glow-text">
             LOADING MESSAGES...
-          </h2>
+          </h3>
         </div>
         <div className="space-y-0">
           {[...Array(3)].map((_, index) => (
@@ -35,12 +35,6 @@ const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame, isLoadin
   if (noNewCommentsMessage) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-cyber-green" />
-          <h2 className="text-lg font-pixel text-cyber-green glow-text">
-            MESSAGE FEED [0]
-          </h2>
-        </div>
         <div className="cyber-border p-8 rounded-sm bg-cyber-dark-alt/30 text-center">
           <MessageCircle className="w-12 h-12 text-cyber-green/50 mx-auto mb-4" />
           <h3 className="text-lg font-pixel text-cyber-green/70 mb-2">
@@ -71,23 +65,14 @@ const MessageList: React.FC<MessageListProps> = ({ messages, timeFrame, isLoadin
 
   // Render the list of messages once loaded
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-cyber-green" />
-        <h2 className="text-lg font-pixel text-cyber-green glow-text">
-          MESSAGE FEED [{messages.length}]
-        </h2>
-      </div>
-      
-      <div className="space-y-0">
-        {messages.map((message, index) => (
-          <MessageCard
-            key={message.id}
-            message={message}
-            isLatest={index === 0}
-          />
-        ))}
-      </div>
+    <div className="space-y-0">
+      {messages.map((message, index) => (
+        <MessageCard
+          key={message.id}
+          message={message}
+          isLatest={index === 0}
+        />
+      ))}
     </div>
   );
 };
