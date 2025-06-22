@@ -4,14 +4,13 @@ import { JsonMessage } from '@/types/message';
 import JsonParser from '@/components/JsonParser';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
-import ApiTester from '@/components/ApiTester';
 import { useApiMessages } from '@/hooks/useApiMessages';
 import { isAfter, subHours } from 'date-fns';
 import { Terminal, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { messages, isLoading, refetch, addMessages, lastResponse, statusCode, noNewCommentsMessage } = useApiMessages({
+  const { messages, isLoading, refetch, lastResponse, statusCode, noNewCommentsMessage } = useApiMessages({
     autoRefresh: true,
     refreshInterval: 30000 // Refresh every 30 seconds
   });
@@ -20,12 +19,13 @@ const Index = () => {
 
   const handleMessageParsed = async (newMessages: JsonMessage[]) => {
     try {
-      // Convert JsonMessage to the format expected by API (without id)
-      const messagesToAdd = newMessages.map(({ id, ...message }) => message);
-      await addMessages(messagesToAdd);
+      // Since we can't add messages to the API anymore, just show a success message
+      console.log('Messages parsed:', newMessages);
       setShowParser(false);
+      // Refresh to get latest data
+      await refetch();
     } catch (error) {
-      console.error('Failed to add messages:', error);
+      console.error('Failed to process messages:', error);
     }
   };
 
@@ -123,9 +123,6 @@ const Index = () => {
                 </div>
               )}
             </div>
-
-            {/* API Tester (temporary for debugging) */}
-            <ApiTester />
           </div>
 
           {/* Messages Panel */}

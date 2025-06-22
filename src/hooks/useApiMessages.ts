@@ -101,66 +101,6 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     }
   }, []);
 
-  const addMessage = useCallback(async (message: Omit<JsonMessage, 'id'>) => {
-    try {
-      const response = await apiService.addMessage(message);
-      if (response.success) {
-        // Refresh messages after adding
-        await loadMessages();
-        toast({
-          title: "Message Added",
-          description: "Successfully added new message",
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Failed to add message');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add message';
-      toast({
-        title: "Add Message Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      throw err;
-    }
-  }, [loadMessages]);
-
-  const addMessages = useCallback(async (newMessages: Omit<JsonMessage, 'id'>[]) => {
-    try {
-      const response = await apiService.addMessages(newMessages);
-      if (response.success) {
-        // Refresh messages after adding
-        await loadMessages();
-        toast({
-          title: "Messages Added",
-          description: `Successfully added ${newMessages.length} messages`,
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Failed to add messages');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add messages';
-      toast({
-        title: "Add Messages Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      throw err;
-    }
-  }, [loadMessages]);
-
-  const healthCheck = useCallback(async () => {
-    try {
-      const response = await apiService.healthCheck();
-      return response.success;
-    } catch (err) {
-      console.error('Health check failed:', err);
-      return false;
-    }
-  }, []);
-
   // Initial load
   useEffect(() => {
     loadMessages();
@@ -185,8 +125,5 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     statusCode,
     noNewCommentsMessage,
     refetch: loadMessages,
-    addMessage,
-    addMessages,
-    healthCheck,
   };
 }; 

@@ -2,7 +2,7 @@ import { JsonMessage } from '@/types/message';
 import { config } from '@/config/environment';
 
 // API configuration - Hardcoded URL
-const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/dev';
+const API_BASE_URL = 'https://dkrb049wod.execute-api.us-east-1.amazonaws.com/dev/';
 
 export interface ApiResponse<T> {
   data: T;
@@ -97,67 +97,12 @@ class ApiService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // Get latest messages in your API format
+  // Get latest messages in your API format - this is the only working endpoint
   async getLatestMessages(): Promise<YourApiResponse> {
-    console.log('Making request to /messages/latest');
-    const response = await this.request<YourApiResponse>('/messages/latest');
+    console.log('Making request to base URL for latest messages');
+    const response = await this.request<YourApiResponse>('');
     console.log('Raw API response:', response);
     return response;
-  }
-
-  // Get all messages (for compatibility)
-  async getMessages(params?: {
-    timeFrame?: string;
-    page?: number;
-    limit?: number;
-    search?: string;
-  }): Promise<MessagesResponse> {
-    const searchParams = new URLSearchParams();
-    
-    if (params?.timeFrame) searchParams.append('timeFrame', params.timeFrame);
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.search) searchParams.append('search', params.search);
-
-    const queryString = searchParams.toString();
-    const endpoint = `/messages${queryString ? `?${queryString}` : ''}`;
-    
-    return this.request<MessagesResponse>(endpoint);
-  }
-
-  // Get messages by time frame
-  async getMessagesByTimeFrame(timeFrame: string): Promise<MessagesResponse> {
-    return this.getMessages({ timeFrame });
-  }
-
-  // Add a new message
-  async addMessage(message: Omit<JsonMessage, 'id'>): Promise<ApiResponse<JsonMessage>> {
-    return this.request<ApiResponse<JsonMessage>>('/messages', {
-      method: 'POST',
-      body: JSON.stringify(message),
-    });
-  }
-
-  // Add multiple messages
-  async addMessages(messages: Omit<JsonMessage, 'id'>[]): Promise<ApiResponse<JsonMessage[]>> {
-    return this.request<ApiResponse<JsonMessage[]>>('/messages/batch', {
-      method: 'POST',
-      body: JSON.stringify({ messages }),
-    });
-  }
-
-  // Get message statistics
-  async getStats(): Promise<ApiResponse<{
-    total: number;
-    recent: number;
-    bySeverity: Record<string, number>;
-  }>> {
-    return this.request<ApiResponse<any>>('/messages/stats');
-  }
-
-  // Health check
-  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string }>> {
-    return this.request<ApiResponse<any>>('/health');
   }
 }
 
