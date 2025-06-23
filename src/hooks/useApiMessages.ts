@@ -69,14 +69,10 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
       }
       
       if (parsed.hasNewMessages) {
-        // Add new messages to existing ones
-        setMessages(prev => {
-          const newMessages = [...parsed.messages, ...prev];
-          // Sort by timestamp (newest first)
-          return newMessages.sort((a, b) => 
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
-        });
+        // Replace messages with the new ones
+        setMessages(parsed.messages.sort((a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        ));
         
         toast({
           title: "New Messages",
