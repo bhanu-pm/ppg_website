@@ -1,5 +1,5 @@
 // src/pages/Index.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { JsonMessage } from '@/types/message';
 import MessageList from '@/components/MessageList';
 import TimeFrameSelector, { timeFrames } from '@/components/TimeFrameSelector';
@@ -9,11 +9,12 @@ import { Terminal, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState('now');
   const { messages, isLoading, refetch, lastResponse, statusCode, noNewCommentsMessage } = useApiMessages({
+    timeFrame: selectedTimeFrame,
     autoRefresh: false,
     refreshInterval: 30000 // Not used since autoRefresh is false
   });
-  const [selectedTimeFrame, setSelectedTimeFrame] = useState('now');
 
   const filteredMessages = useMemo(() => {
     if (selectedTimeFrame === 'all') return messages;

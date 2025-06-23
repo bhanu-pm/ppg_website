@@ -26,9 +26,13 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     setNoNewCommentsMessage(null);
     
     try {
-      // Use the new API endpoint that returns your format
-      const response: YourApiResponse = await apiService.getLatestMessages();
-      
+      // Use the correct API endpoint based on timeFrame
+      let response: YourApiResponse;
+      if (timeFrame === 'all') {
+        response = await apiService.getAllComments();
+      } else {
+        response = await apiService.getLatestMessages();
+      }
       // Debug logging
       console.log('API Response:', response);
       console.log('Response type:', typeof response);
@@ -99,7 +103,7 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [timeFrame]);
 
   // Initial load
   useEffect(() => {

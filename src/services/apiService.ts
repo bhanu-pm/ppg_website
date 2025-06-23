@@ -103,6 +103,14 @@ class ApiService {
     console.log('Raw API response:', response);
     return response;
   }
+
+  // Get all comments in your API format
+  async getAllComments(): Promise<YourApiResponse> {
+    console.log('Making request to /all-comments for all messages');
+    const response = await this.request<YourApiResponse>('all-comments');
+    console.log('Raw API response:', response);
+    return response;
+  }
 }
 
 // Export singleton instance
