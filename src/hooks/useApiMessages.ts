@@ -13,6 +13,8 @@ export interface UseApiMessagesOptions {
 export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
   const { timeFrame, autoRefresh = false, refreshInterval = 30000 } = options;
   
+  // Caches for each time frame
+  const [cache, setCache] = useState<{ [key: string]: JsonMessage[] }>({});
   const [messages, setMessages] = useState<JsonMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,75 +22,40 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
   const [statusCode, setStatusCode] = useState<number | null>(null);
   const [noNewCommentsMessage, setNoNewCommentsMessage] = useState<string | null>(null);
 
-  const loadMessages = useCallback(async () => {
+  // Track if a time frame has been fetched before
+  const [fetched, setFetched] = useState<{ [key: string]: boolean }>({});
+
+  // Fetch and update cache for the current time frame
+  const fetchAndCache = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     setNoNewCommentsMessage(null);
-    
     try {
-      // Use the correct API endpoint based on timeFrame
       let response: YourApiResponse;
       if (timeFrame === 'all') {
         response = await apiService.getAllComments();
       } else {
         response = await apiService.getLatestMessages();
       }
-      // Debug logging
-      console.log('API Response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response keys:', Object.keys(response));
-      
-      // Track the status code
       setStatusCode(response.statusCode);
-      console.log('Status code set to:', response.statusCode);
-      
-      // Parse the response using our parser
       const parsed = parseApiResponse(response);
-      console.log('Parsed response:', parsed);
-      
-      // Check if the response contains "No new comments!" message
-      // Handle both plain string and JSON-encoded string cases
-      if (typeof response.body === 'string') {
-        console.log('Body is string:', response.body);
-        // Try to parse as JSON first (in case it's json.dumps output)
-        try {
-          const parsedBody = JSON.parse(response.body);
-          console.log('Parsed body as JSON:', parsedBody);
-          if (typeof parsedBody === 'string' && parsedBody.includes('No new comments')) {
-            console.log('Found "No new comments" in parsed JSON body');
-            setNoNewCommentsMessage(parsedBody);
-          }
-        } catch {
-          console.log('Body is not valid JSON, checking for plain string');
-          // If not JSON, check if it's a plain string
-          if (response.body.includes('No new comments')) {
-            console.log('Found "No new comments" in plain string body');
-            setNoNewCommentsMessage(response.body);
-          }
-        }
-      }
-      
       if (parsed.hasNewMessages) {
-        // Replace messages with the new ones
-        setMessages(parsed.messages.sort((a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ));
-        
-        toast({
-          title: "New Messages",
-          description: parsed.message,
-        });
+        const sorted = parsed.messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setCache(prev => ({ ...prev, [timeFrame || 'now']: sorted }));
+        setMessages(sorted);
+        setFetched(prev => ({ ...prev, [timeFrame || 'now']: true }));
+        toast({ title: "New Messages", description: parsed.message });
+      } else {
+        setCache(prev => ({ ...prev, [timeFrame || 'now']: [] }));
+        setMessages([]);
+        setFetched(prev => ({ ...prev, [timeFrame || 'now']: true }));
       }
-      
       setLastResponse(parsed.message);
-      
     } catch (err) {
       console.error('API Error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data from API';
       setError(errorMessage);
       setStatusCode(null);
-      
-      // Don't show the warning toast for expected "No new comments!" responses
       if (!errorMessage.includes('No new comments')) {
         toast({
           title: "API Load Warning",
@@ -101,21 +68,29 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     }
   }, [timeFrame]);
 
-  // Initial load
+  // On time frame change, show cached messages if available, otherwise fetch
   useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
+    const key = timeFrame || 'now';
+    if (fetched[key]) {
+      setMessages(cache[key] || []);
+    } else {
+      fetchAndCache();
+    }
+  }, [timeFrame]);
+
+  // Manual refresh always fetches and updates cache
+  const refetch = useCallback(() => {
+    fetchAndCache();
+  }, [fetchAndCache]);
 
   // Auto-refresh functionality
   useEffect(() => {
     if (!autoRefresh) return;
-
     const interval = setInterval(() => {
-      loadMessages();
+      fetchAndCache();
     }, refreshInterval);
-
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, loadMessages]);
+  }, [autoRefresh, refreshInterval, fetchAndCache]);
 
   return {
     messages,
@@ -124,6 +99,6 @@ export const useApiMessages = (options: UseApiMessagesOptions = {}) => {
     lastResponse,
     statusCode,
     noNewCommentsMessage,
-    refetch: loadMessages,
+    refetch,
   };
 }; 
